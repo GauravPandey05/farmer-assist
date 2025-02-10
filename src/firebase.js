@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPhoneNumber } from "firebase/auth";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence, collection, addDoc, getDoc, doc, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -12,16 +12,25 @@ const firebaseConfig = {
   measurementId: "G-R67JDXQWLV"
 };
 
-// 🔥 Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ✅ Enable Firestore Offline Mode
 enableIndexedDbPersistence(db)
   .then(() => console.log("Offline mode enabled"))
   .catch((err) => console.error("Failed to enable offline persistence:", err));
 
-// ✅ Export modules properly
-export { auth, db, signInWithPhoneNumber };
+const setUpRecaptcha = () => {
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+      size: "invisible",
+      callback: (response) => console.log("reCAPTCHA solved!", response),
+      "expired-callback": () => console.log("reCAPTCHA expired. Please try again."),
+    });
+    window.recaptchaVerifier.render();
+  }
+  return window.recaptchaVerifier;
+};
+
+export { auth, db, RecaptchaVerifier, signInWithPhoneNumber, setUpRecaptcha };
 export { collection, addDoc, getDoc, doc, updateDoc };

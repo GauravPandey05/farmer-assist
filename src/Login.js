@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
-import { auth, db } from "./firebase";
+import React, { useState } from "react";
+import { signInWithPhoneNumber } from "firebase/auth";
+import { auth, db, setUpRecaptcha } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
@@ -10,23 +10,13 @@ const Login = () => {
   const [confirmationResult, setConfirmationResult] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: () => console.log("reCAPTCHA solved automatically!"),
-      });
-      window.recaptchaVerifier.render().then((widgetId) => {
-        window.recaptchaWidgetId = widgetId; // Store widget ID globally
-      });
-    }
-  }, []);
-
   const requestOTP = () => {
     if (!phone.trim()) {
       alert("Please enter a valid phone number.");
       return;
     }
+
+    setUpRecaptcha();
 
     signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
       .then((result) => {
@@ -82,8 +72,7 @@ const Login = () => {
       <button onClick={requestOTP} className="px-4 py-2 bg-blue-500 text-white rounded">
         Get OTP
       </button>
-
-      <div id="recaptcha-container" className="hidden"></div> {/* Fully hidden reCAPTCHA */}
+      <div id="recaptcha-container"></div>
 
       {confirmationResult && (
         <div>
