@@ -1,13 +1,20 @@
-// Import the functions you need from the SDKs you need
+// Import the functions you need from the SDKs
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDoc, doc } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { 
+  getAuth, 
+  RecaptchaVerifier,  // ✅ Import RecaptchaVerifier
+  signInWithPhoneNumber  // ✅ Import signInWithPhoneNumber
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  getDoc, 
+  doc 
+} from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAVDAJ6YB1AG9ZbBeN--eM8LBysDHUoR9U",
   authDomain: "farmer-assist-6371c.firebaseapp.com",
@@ -24,6 +31,20 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// ✅ Function to setup reCAPTCHA
+const setUpRecaptcha = (number) => {
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "invisible",
+    callback: (response) => {
+      console.log("reCAPTCHA solved!", response);
+    },
+    "expired-callback": () => {
+      console.log("reCAPTCHA expired. Please solve again.");
+    }
+  });
+  return window.recaptchaVerifier;
+};
 
-export { auth, RecaptchaVerifier, signInWithPhoneNumber };
-export { db, collection, addDoc, getDoc, doc };
+// ✅ Export modules properly
+export { auth, db, RecaptchaVerifier, signInWithPhoneNumber, setUpRecaptcha };
+export { collection, addDoc, getDoc, doc };
