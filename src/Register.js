@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { auth } from "./firebase";
+import { useNavigate } from "react-router-dom";
 
 const db = getFirestore();
 
@@ -13,6 +14,7 @@ const Register = ({ user }) => {
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [isGovtEmployee, setIsGovtEmployee] = useState(false);
   const [state, setState] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,8 +23,8 @@ const Register = ({ user }) => {
       return;
     }
 
-    if (aadhaarAvailable && aadhaarNumber.length !== 12) {
-      alert("Aadhaar number must be 12 digits long.");
+    if (aadhaarAvailable && (!/^\d{12}$/.test(aadhaarNumber))) {
+      alert("Aadhaar number must be exactly 12 digits.");
       return;
     }
 
@@ -41,6 +43,7 @@ const Register = ({ user }) => {
       });
 
       alert("Profile Saved!");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error saving profile:", error);
       alert("Failed to save profile. Try again.");
@@ -53,77 +56,35 @@ const Register = ({ user }) => {
     <form onSubmit={handleSubmit} className="p-6">
       <h2 className="text-xl font-bold">Complete Your Profile</h2>
       
-      <input 
-        type="text" 
-        placeholder="Full Name" 
-        className="border p-2 rounded w-full my-2" 
-        value={name} 
-        onChange={(e) => setName(e.target.value)} 
-        required 
-      />
-      
-      <input 
-        type="number" 
-        placeholder="Land Size (in acres)" 
-        className="border p-2 rounded w-full my-2" 
-        value={landSize} 
-        onChange={(e) => setLandSize(e.target.value)} 
-        required 
-      />
-      
-      <input 
-        type="text" 
-        placeholder="Crops Grown (comma-separated)" 
-        className="border p-2 rounded w-full my-2" 
-        value={crops} 
-        onChange={(e) => setCrops(e.target.value)} 
-        required 
-      />
-      
-      <input 
-        type="number" 
-        placeholder="Annual Income (in ₹)" 
-        className="border p-2 rounded w-full my-2" 
-        value={income} 
-        onChange={(e) => setIncome(e.target.value)} 
-        required 
-      />
+      <input type="text" placeholder="Full Name" className="border p-2 rounded w-full my-2" 
+        value={name} onChange={(e) => setName(e.target.value)} required />
 
-      <input 
-        type="text" 
-        placeholder="State" 
-        className="border p-2 rounded w-full my-2" 
-        value={state} 
-        onChange={(e) => setState(e.target.value)} 
-        required 
-      />
+      <input type="number" placeholder="Land Size (in acres)" className="border p-2 rounded w-full my-2" 
+        value={landSize} onChange={(e) => setLandSize(e.target.value)} required />
+
+      <input type="text" placeholder="Crops Grown (comma-separated)" className="border p-2 rounded w-full my-2" 
+        value={crops} onChange={(e) => setCrops(e.target.value)} required />
+
+      <input type="number" placeholder="Annual Income (₹)" className="border p-2 rounded w-full my-2" 
+        value={income} onChange={(e) => setIncome(e.target.value)} required />
+
+      <input type="text" placeholder="State" className="border p-2 rounded w-full my-2" 
+        value={state} onChange={(e) => setState(e.target.value)} required />
 
       <label className="flex items-center space-x-2 my-2">
-        <input 
-          type="checkbox" 
-          checked={aadhaarAvailable} 
-          onChange={() => setAadhaarAvailable(!aadhaarAvailable)} 
-        />
+        <input type="checkbox" checked={aadhaarAvailable} 
+          onChange={() => setAadhaarAvailable(!aadhaarAvailable)} />
         <span>Aadhaar Available</span>
       </label>
 
       {aadhaarAvailable && (
-        <input 
-          type="text" 
-          placeholder="Enter Aadhaar Number" 
-          className="border p-2 rounded w-full my-2" 
-          value={aadhaarNumber} 
-          onChange={(e) => setAadhaarNumber(e.target.value)} 
-          required 
-        />
+        <input type="text" placeholder="Enter Aadhaar Number (12 digits)" className="border p-2 rounded w-full my-2" 
+          value={aadhaarNumber} onChange={(e) => setAadhaarNumber(e.target.value)} required />
       )}
 
       <label className="flex items-center space-x-2 my-2">
-        <input 
-          type="checkbox" 
-          checked={isGovtEmployee} 
-          onChange={() => setIsGovtEmployee(!isGovtEmployee)} 
-        />
+        <input type="checkbox" checked={isGovtEmployee} 
+          onChange={() => setIsGovtEmployee(!isGovtEmployee)} />
         <span>Government Employee</span>
       </label>
 
