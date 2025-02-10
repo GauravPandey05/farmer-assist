@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { auth } from "../firebase"; // Ensure Firebase is initialized
+import { auth } from "./firebase"; // Ensure Firebase is initialized
 const db = getFirestore();
 
 const Register = ({ user }) => {

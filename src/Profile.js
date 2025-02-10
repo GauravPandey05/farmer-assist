@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db, auth, doc, getDoc, updateDoc } from "../firebase";
+import { db, auth, doc, getDoc, updateDoc } from "./firebase";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {

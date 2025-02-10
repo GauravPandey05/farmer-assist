@@ -1,17 +1,17 @@
-// Import the functions you need from the SDKs
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { 
   getAuth, 
-  RecaptchaVerifier,  // ✅ Import RecaptchaVerifier
-  signInWithPhoneNumber  // ✅ Import signInWithPhoneNumber
+  RecaptchaVerifier,  
+  signInWithPhoneNumber  
 } from "firebase/auth";
 import { 
   getFirestore, 
   collection, 
   addDoc, 
   getDoc, 
-  doc 
+  doc,
+  updateDoc  // ✅ Import updateDoc
 } from "firebase/firestore";
 
 // Firebase configuration
@@ -47,4 +47,4 @@ const setUpRecaptcha = (number) => {
 
 // ✅ Export modules properly
 export { auth, db, RecaptchaVerifier, signInWithPhoneNumber, setUpRecaptcha };
-export { collection, addDoc, getDoc, doc };
+export { collection, addDoc, getDoc, doc, updateDoc }; // ✅ Export updateDoc

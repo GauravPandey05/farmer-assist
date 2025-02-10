@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth, db } from "../firebase"; // ✅ Ensure Firebase is properly initialized
+import { auth, db } from "./firebase"; // ✅ Ensure Firebase is properly initialized
 import { doc, getDoc } from "firebase/firestore"; // ✅ Import Firestore functions
 import { useNavigate } from "react-router-dom";
 

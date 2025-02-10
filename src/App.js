@@ -8,7 +8,7 @@ import Register from "./Register";
 import Profile from "./Profile";
 import Dashboard from "./Dashboard";
 
-function App() {
+function AuthHandler() {
   const [user, setUser] = useState(null);
   const [profileExists, setProfileExists] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -21,8 +21,6 @@ function App() {
         const profileRef = doc(db, "farmers", currentUser.uid);
         const profileSnap = await getDoc(profileRef);
         setProfileExists(profileSnap.exists());
-
-        // Redirect based on profile existence
         navigate(profileSnap.exists() ? "/dashboard" : "/profile");
       } else {
         navigate("/");
@@ -33,29 +31,15 @@ function App() {
     return () => unsubscribe();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      alert("Logged out successfully!");
-      navigate("/");
-    } catch (error) {
-      console.error("Logout Error:", error);
-    }
-  };
-
   if (loading) return <h2>Loading...</h2>;
 
   return (
     <Routes>
       {user ? (
         profileExists ? (
-          <>
-            <Route path="/dashboard" element={<Dashboard />} />
-          </>
+          <Route path="/dashboard" element={<Dashboard />} />
         ) : (
-          <>
-            <Route path="/profile" element={<Profile user={user} />} />
-          </>
+          <Route path="/profile" element={<Profile user={user} />} />
         )
       ) : (
         <>
@@ -67,10 +51,10 @@ function App() {
   );
 }
 
-export default function AppWrapper() {
+export default function App() {
   return (
     <Router>
-      <App />
+      <AuthHandler />
     </Router>
   );
 }
