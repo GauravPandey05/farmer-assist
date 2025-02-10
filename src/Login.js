@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth, db } from "./firebase"; // ✅ Ensure Firebase is properly initialized
-import { doc, getDoc } from "firebase/firestore"; // ✅ Import Firestore functions
+import { auth, db } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -10,7 +10,6 @@ const Login = () => {
   const [confirmationResult, setConfirmationResult] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ Function to set up reCAPTCHA
   const setUpRecaptcha = () => {
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", {
@@ -20,14 +19,18 @@ const Login = () => {
         },
         "expired-callback": () => {
           console.log("reCAPTCHA expired. Please try again.");
-        }
+        },
       });
       window.recaptchaVerifier.render();
     }
   };
 
-  // ✅ Function to request OTP
   const requestOTP = () => {
+    if (!phone.trim()) {
+      alert("Please enter a valid phone number.");
+      return;
+    }
+
     setUpRecaptcha();
 
     signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
@@ -41,7 +44,6 @@ const Login = () => {
       });
   };
 
-  // ✅ Function to verify OTP
   const verifyOTP = () => {
     if (!confirmationResult) {
       alert("Please request OTP first.");
@@ -53,20 +55,26 @@ const Login = () => {
       return;
     }
 
-    confirmationResult.confirm(otp)
-      .then((result) => {
+    confirmationResult
+      .confirm(otp)
+      .then(async (result) => {
         const user = result.user;
         alert("Login Successful!");
 
-        // ✅ Check if user profile exists in Firestore
+        // ✅ Fetch user profile from Firestore
         const userProfileRef = doc(db, "farmers", user.uid);
-        getDoc(userProfileRef).then((docSnap) => {
-          if (docSnap.exists()) {
-            navigate("/dashboard"); // ✅ Redirect to dashboard if profile exists
-          } else {
-            navigate("/profile"); // ✅ Redirect to profile if first-time login
-          }
-        });
+        const docSnap = await getDoc(userProfileRef);
+
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          
+          // ✅ Store user details in session storage for scheme recommendations
+          sessionStorage.setItem("userData", JSON.stringify(userData));
+
+          navigate("/dashboard"); // Redirect to dashboard if profile exists
+        } else {
+          navigate("/profile"); // Redirect to profile if first-time login
+        }
       })
       .catch(() => alert("Invalid OTP"));
   };
