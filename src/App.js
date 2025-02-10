@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -21,33 +21,43 @@ function AuthHandler() {
         const profileRef = doc(db, "farmers", currentUser.uid);
         const profileSnap = await getDoc(profileRef);
         setProfileExists(profileSnap.exists());
-        navigate(profileSnap.exists() ? "/dashboard" : "/profile");
       } else {
-        navigate("/");
+        setProfileExists(false);
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setProfileExists(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+  };
 
   if (loading) return <h2>Loading...</h2>;
 
   return (
-    <Routes>
-      {user ? (
-        profileExists ? (
-          <Route path="/dashboard" element={<Dashboard />} />
-        ) : (
-          <Route path="/profile" element={<Profile user={user} />} />
-        )
-      ) : (
-        <>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </>
+    <>
+      {user && (
+        <button onClick={handleSignOut} className="px-4 py-2 bg-red-500 text-white rounded absolute top-4 right-4">
+          Sign Out
+        </button>
       )}
-    </Routes>
+      <Routes>
+        <Route path="/" element={user ? <Navigate to={profileExists ? "/dashboard" : "/profile"} /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to={profileExists ? "/dashboard" : "/profile"} /> : <Register />} />
+        <Route path="/profile" element={user ? <Profile /> : <Navigate to="/" />} />
+        <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </>
   );
 }
 

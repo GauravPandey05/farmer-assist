@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { enableNetwork, disableNetwork } from "firebase/firestore";
 import { 
   getAuth, 
   RecaptchaVerifier,  
@@ -11,7 +11,7 @@ import {
   addDoc, 
   getDoc, 
   doc,
-  updateDoc  // ✅ Import updateDoc
+  updateDoc  
 } from "firebase/firestore";
 
 // Firebase configuration
@@ -27,11 +27,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ✅ Function to setup reCAPTCHA
+
 const setUpRecaptcha = (number) => {
   window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
     size: "invisible",
@@ -47,4 +46,8 @@ const setUpRecaptcha = (number) => {
 
 // ✅ Export modules properly
 export { auth, db, RecaptchaVerifier, signInWithPhoneNumber, setUpRecaptcha };
-export { collection, addDoc, getDoc, doc, updateDoc }; // ✅ Export updateDoc
+export { collection, addDoc, getDoc, doc, updateDoc }; 
+
+enableNetwork(db).catch((error) => {
+  console.error("Failed to enable Firestore network:", error);
+});
