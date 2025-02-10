@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
 import Profile from "./Profile";
@@ -12,6 +12,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [profileExists, setProfileExists] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -20,49 +21,56 @@ function App() {
         const profileRef = doc(db, "farmers", currentUser.uid);
         const profileSnap = await getDoc(profileRef);
         setProfileExists(profileSnap.exists());
+
+        // Redirect based on profile existence
+        navigate(profileSnap.exists() ? "/dashboard" : "/profile");
+      } else {
+        navigate("/");
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => alert("Logged out successfully!"))
-      .catch((error) => console.error("Logout Error:", error));
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout Error:", error);
+    }
   };
 
   if (loading) return <h2>Loading...</h2>;
 
   return (
-    <Router>
-      <div className="App">
-        {user ? (
-          profileExists ? (
-            <Routes>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="*" element={<Navigate to="/dashboard" />} />
-            </Routes>
-          ) : (
-            <Routes>
-              <Route path="/profile" element={<Profile user={user} />} />
-              <Route path="*" element={<Navigate to="/profile" />} />
-            </Routes>
-          )
+    <Routes>
+      {user ? (
+        profileExists ? (
+          <>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </>
         ) : (
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        )}
-
-        {user && <button onClick={handleLogout}>Logout</button>}
-      </div>
-    </Router>
+          <>
+            <Route path="/profile" element={<Profile user={user} />} />
+          </>
+        )
+      ) : (
+        <>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </>
+      )}
+    </Routes>
   );
 }
 
-
-export default App;
+export default function AppWrapper() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}
