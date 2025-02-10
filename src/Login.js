@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { signInWithPhoneNumber } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -10,26 +10,13 @@ const Login = () => {
   const [confirmationResult, setConfirmationResult] = useState(null);
   const navigate = useNavigate();
 
-  const setUpRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", {
-        size: "invisible",
-        callback: () => console.log("reCAPTCHA solved!"),
-        "expired-callback": () => console.log("reCAPTCHA expired. Try again."),
-      });
-      window.recaptchaVerifier.render();
-    }
-  };
-
   const requestOTP = () => {
     if (!phone.trim()) {
       alert("Please enter a valid phone number.");
       return;
     }
 
-    setUpRecaptcha();
-
-    signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+    signInWithPhoneNumber(auth, phone)
       .then((result) => {
         setConfirmationResult(result);
         alert("OTP Sent!");
@@ -83,7 +70,6 @@ const Login = () => {
       <button onClick={requestOTP} className="px-4 py-2 bg-blue-500 text-white rounded">
         Get OTP
       </button>
-      <div id="recaptcha"></div>
 
       {confirmationResult && (
         <div>

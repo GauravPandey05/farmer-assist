@@ -64,9 +64,7 @@ const Dashboard = () => {
         <p>No schemes found matching your profile.</p>
       )}
 
-      <button onClick={handleSignOut} className="px-4 py-2 bg-red-500 text-white rounded mt-3">
-        Sign Out
-      </button>
+      
     </div>
   );
 };
