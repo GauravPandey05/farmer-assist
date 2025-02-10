@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "../firebase"; // Ensure you have initialized Firebase in `firebase.js`
+import { useNavigate } from "react-router-dom";
+
 
 const Login = () => {
   const [phone, setPhone] = useState("");
@@ -26,18 +28,36 @@ const Login = () => {
       });
   };
 
-  const verifyOTP = () => {
-    if (!confirmationResult) {
-      alert("Please request OTP first.");
-      return;
-    }
+  
+const verifyOTP = () => {
+  if (!confirmationResult) {
+    alert("Please request OTP first.");
+    return;
+  }
 
-    confirmationResult.confirm(otp)
-      .then((result) => {
-        alert("Login Successful!");
-      })
-      .catch(() => alert("Invalid OTP"));
-  };
+  if (!otp.trim()) {
+    alert("Please enter the OTP.");
+    return;
+  }
+
+  confirmationResult.confirm(otp)
+    .then((result) => {
+      const user = result.user;
+      alert("Login Successful!");
+
+      // Check if user profile exists
+      const userProfileRef = doc(db, "farmers", user.uid);
+      getDoc(userProfileRef).then((docSnap) => {
+        if (docSnap.exists()) {
+          navigate("/dashboard"); // Redirect to dashboard if profile exists
+        } else {
+          navigate("/profile"); // Redirect to profile if first-time login
+        }
+      });
+    })
+    .catch(() => alert("Invalid OTP"));
+};
+
 
   return (
     <div className="p-6 text-center">
