@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { auth } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 import { useNavigate } from "react-router-dom";
-
-const db = getFirestore();
 
 const Register = ({ user }) => {
   const [name, setName] = useState("");
@@ -23,25 +21,27 @@ const Register = ({ user }) => {
       return;
     }
 
-    if (aadhaarAvailable && (!/^\d{12}$/.test(aadhaarNumber))) {
+    if (aadhaarAvailable && !/^\d{12}$/.test(aadhaarNumber)) {
       alert("Aadhaar number must be exactly 12 digits.");
       return;
     }
 
-    try {
-      await setDoc(doc(db, "farmers", user.uid), {
-        uid: user.uid,
-        name,
-        phone: user.phoneNumber || "N/A",
-        landSize: parseFloat(landSize),
-        crops: crops.split(",").map((crop) => crop.trim()),
-        income: parseFloat(income),
-        aadhaar_available: aadhaarAvailable,
-        aadhaar_number: aadhaarAvailable ? aadhaarNumber : null,
-        is_govt_employee: isGovtEmployee,
-        state,
-      });
+    const userProfile = {
+      uid: user.uid,
+      name,
+      phone: user.phoneNumber || "N/A",
+      landSize: parseFloat(landSize),
+      crops: crops.split(",").map((crop) => crop.trim()),
+      income: parseFloat(income),
+      aadhaar_available: aadhaarAvailable,
+      aadhaar_number: aadhaarAvailable ? aadhaarNumber : null,
+      is_govt_employee: isGovtEmployee,
+      state,
+    };
 
+    try {
+      await setDoc(doc(db, "farmers", user.uid), userProfile);
+      sessionStorage.setItem("userData", JSON.stringify(userProfile));
       alert("Profile Saved!");
       navigate("/dashboard");
     } catch (error) {
@@ -55,7 +55,7 @@ const Register = ({ user }) => {
   return (
     <form onSubmit={handleSubmit} className="p-6">
       <h2 className="text-xl font-bold">Complete Your Profile</h2>
-      
+
       <input type="text" placeholder="Full Name" className="border p-2 rounded w-full my-2" 
         value={name} onChange={(e) => setName(e.target.value)} required />
 
@@ -72,8 +72,7 @@ const Register = ({ user }) => {
         value={state} onChange={(e) => setState(e.target.value)} required />
 
       <label className="flex items-center space-x-2 my-2">
-        <input type="checkbox" checked={aadhaarAvailable} 
-          onChange={() => setAadhaarAvailable(!aadhaarAvailable)} />
+        <input type="checkbox" checked={aadhaarAvailable} onChange={() => setAadhaarAvailable(!aadhaarAvailable)} />
         <span>Aadhaar Available</span>
       </label>
 
@@ -83,8 +82,7 @@ const Register = ({ user }) => {
       )}
 
       <label className="flex items-center space-x-2 my-2">
-        <input type="checkbox" checked={isGovtEmployee} 
-          onChange={() => setIsGovtEmployee(!isGovtEmployee)} />
+        <input type="checkbox" checked={isGovtEmployee} onChange={() => setIsGovtEmployee(!isGovtEmployee)} />
         <span>Government Employee</span>
       </label>
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -14,12 +14,8 @@ const Login = () => {
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", {
         size: "invisible",
-        callback: (response) => {
-          console.log("reCAPTCHA solved!", response);
-        },
-        "expired-callback": () => {
-          console.log("reCAPTCHA expired. Please try again.");
-        },
+        callback: () => console.log("reCAPTCHA solved!"),
+        "expired-callback": () => console.log("reCAPTCHA expired. Try again."),
       });
       window.recaptchaVerifier.render();
     }
@@ -61,19 +57,14 @@ const Login = () => {
         const user = result.user;
         alert("Login Successful!");
 
-        // ✅ Fetch user profile from Firestore
         const userProfileRef = doc(db, "farmers", user.uid);
         const docSnap = await getDoc(userProfileRef);
 
         if (docSnap.exists()) {
-          const userData = docSnap.data();
-          
-          // ✅ Store user details in session storage for scheme recommendations
-          sessionStorage.setItem("userData", JSON.stringify(userData));
-
-          navigate("/dashboard"); // Redirect to dashboard if profile exists
+          sessionStorage.setItem("userData", JSON.stringify(docSnap.data()));
+          navigate("/dashboard");
         } else {
-          navigate("/profile"); // Redirect to profile if first-time login
+          navigate("/register");
         }
       })
       .catch(() => alert("Invalid OTP"));

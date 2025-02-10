@@ -5,7 +5,6 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import Login from "./Login";
 import Register from "./Register";
-import Profile from "./Profile";
 import Dashboard from "./Dashboard";
 
 function AuthHandler() {
@@ -16,14 +15,12 @@ function AuthHandler() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
         const profileRef = doc(db, "farmers", currentUser.uid);
         const profileSnap = await getDoc(profileRef);
         setProfileExists(profileSnap.exists());
-      } else {
-        setProfileExists(false);
       }
+      setUser(currentUser);
       setLoading(false);
     });
 
@@ -51,9 +48,8 @@ function AuthHandler() {
         </button>
       )}
       <Routes>
-        <Route path="/" element={user ? <Navigate to={profileExists ? "/dashboard" : "/profile"} /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to={profileExists ? "/dashboard" : "/profile"} /> : <Register />} />
-        <Route path="/profile" element={user ? <Profile /> : <Navigate to="/" />} />
+        <Route path="/" element={user ? <Navigate to={profileExists ? "/dashboard" : "/register"} /> : <Login />} />
+        <Route path="/register" element={user ? (profileExists ? <Navigate to="/dashboard" /> : <Register user={user} />) : <Navigate to="/" />} />
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
