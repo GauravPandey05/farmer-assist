@@ -1,0 +1,42 @@
+import { db } from "./firebase";
+
+// Function to add a new document to a collection
+export const addDocument = async (collectionName, data) => {
+    try {
+        const docRef = await db.collection(collectionName).add(data);
+        console.log("Document written with ID:", docRef.id);
+    } catch (error) {
+        console.error("Error adding document:", error);
+    }
+};
+
+// Function to get all documents from a collection
+export const getDocuments = async (collectionName) => {
+    try {
+        const snapshot = await db.collection(collectionName).get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error("Error fetching documents:", error);
+        return [];
+    }
+};
+
+// Function to update a document by ID
+export const updateDocument = async (collectionName, docId, updatedData) => {
+    try {
+        await db.collection(collectionName).doc(docId).update(updatedData);
+        console.log("Document updated successfully");
+    } catch (error) {
+        console.error("Error updating document:", error);
+    }
+};
+
+// Function to delete a document by ID
+export const deleteDocument = async (collectionName, docId) => {
+    try {
+        await db.collection(collectionName).doc(docId).delete();
+        console.log("Document deleted successfully");
+    } catch (error) {
+        console.error("Error deleting document:", error);
+    }
+};

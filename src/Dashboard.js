@@ -13,9 +13,9 @@ const Dashboard = () => {
     if (storedUserData) {
       const parsedData = JSON.parse(storedUserData);
       setUserData(parsedData);
-      fetchSchemes(parsedData); // Fetch schemes based on user profile
+      fetchSchemes(parsedData);
     } else {
-      navigate("/profile"); // Redirect if profile is missing
+      navigate("/profile");
     }
   }, []);
 
@@ -37,7 +37,7 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      sessionStorage.removeItem("userData"); // Clear session storage on logout
+      sessionStorage.removeItem("userData");
       navigate("/");
     } catch (error) {
       console.error("Sign out error:", error);
@@ -50,6 +50,7 @@ const Dashboard = () => {
       <p>Land Size: {userData?.landSize} acres</p>
       <p>Income: ₹{userData?.income}</p>
       <p>Aadhaar Available: {userData?.aadhaar_available ? "Yes" : "No"}</p>
+      <p>Crops Grown: {userData?.crops?.join(", ") || "Not provided"}</p>
 
       <h3 className="text-lg font-semibold mt-4">Recommended Schemes:</h3>
       {schemes.length > 0 ? (
@@ -64,7 +65,14 @@ const Dashboard = () => {
         <p>No schemes found matching your profile.</p>
       )}
 
-      
+      <button
+        onClick={() => navigate("/register", { state: { update: true } })}
+        className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded"
+      >
+        Update Profile
+      </button>
+
+
     </div>
   );
 };

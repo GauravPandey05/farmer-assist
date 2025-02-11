@@ -49,7 +49,7 @@ function AuthHandler() {
       )}
       <Routes>
         <Route path="/" element={user ? <Navigate to={profileExists ? "/dashboard" : "/register"} /> : <Login />} />
-        <Route path="/register" element={user ? (profileExists ? <Navigate to="/dashboard" /> : <Register user={user} />) : <Navigate to="/" />} />
+        <Route path="/register" element={user ? <Register user={user} /> : <Navigate to="/" />} />
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
